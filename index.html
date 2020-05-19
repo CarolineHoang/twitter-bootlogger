@@ -1,0 +1,270 @@
+<!-- 
+    Author: Caroline Hoang
+    A basic Imitiation of Twitter's Message posting system with max word count defined by "maxChar"
+    [A UI Design Class Assignment]
+
+    Note: since this program was short, code and styles are all included in this HTML document
+
+    Intersting Behavior Choices:
+        1) Chose to let user keep all spaces, leading, trailing or otherwise, in case thwey wanted them for uniquely styled input
+        2) You can hit enter key to submit (so no line breaks are allowed).   
+-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Twitter Boot-logger</title>
+
+
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script> 
+        <script>
+            //hard coded input values
+            var maxChar= 30 ;
+            // var user_fname= "Caroline"
+            // var user_lname= "Hoang"
+            // var user_name = poster_fname + " " + poster_lname
+            var user_name = "Caroline"
+
+            //counters
+            var charCount = 0; //counts the number of characters in the string
+            var strippedCharCount = 0; //counts the number of characters after getting rid of all spaces
+
+            //string presentations
+            var currString = ""; //normal string
+            var printString = ""; //string with all spaces replaced with &nbsp;
+            
+
+            window.onload = function(){  //styles and values to preset for when the page first loads
+                $("#counter").text(maxChar);
+                $("#post-button").removeClass( "enabled-button").addClass("disabled-button").attr('disabled','disabled');
+                $("#counter").removeClass( "text-red" ).addClass( "text-light-grey" );
+                $("#text-field").focus(); //move focus on the textbox at the start
+            };
+
+
+            function updateCount(string){ //updates the strippedCharCount and the return value is used to update count
+                strStrip= string.replace(/\s/g, ""); // get a string stripped of all spaces to count characters
+                strippedCharCount = strStrip.length;
+                return maxChar - string.length;
+            }
+
+            function uploadPost(){ //creates new posts and prepends it to the list of divs
+                if (strippedCharCount >0 && charCount>=0){
+                    var printString = currString.replace(/\s/g, "&nbsp;"); // replaces all space with non-breaking space for html output
+                  
+                    var user = $("" +
+                                "<div>" + 
+                                    user_name + 
+                                "</div>");
+
+                    $(user).addClass("name-partition");
+
+                    var message = $("" +
+                                "<div>" + 
+                                    ":&nbsp;&nbsp;&nbsp;" + printString + 
+                                "</div>"); 
+
+                    $(message).addClass("message-partition");                       
+                    var new_post =  $("<div>").append(user).append(message);
+                    $(new_post).addClass("text-post");  // must be .html not .text to parse the non-breaking space
+                    $("#posts-container").prepend(new_post);
+                    
+                }
+
+                //everything to do to reset the counter and textbox after a posting
+                if (charCount>=0){
+
+                    $("#text-field").val(""); //clear the text area
+                    currString = ""; //clear the current string
+                    strippedCharCount =0; //clear the stripped Char count
+                    charCount=0; //clear the char count
+                    $("#counter").html(maxChar); //set the counter to 0
+
+                    //disable the button because posting doesn't require entering more input 
+                    //to accomplish so the other condition to disable will not fire
+                    $("#post-button").removeClass("enabled-button").addClass( "disabled-button")
+                    $("#post-button").attr('disabled','disabled');
+                }
+
+                $("#text-field").focus(); //move focus back on the textbox after submission or generally any button click
+            }
+
+            $(document).ready(function(){ // handles the changinging styles and values of both the counter and button
+ 
+                $("#text-field").on("input", function(){ //input accepts only things that type into the field but notices clicking copy-paste changes,
+                                                         //change only works after you lose focus
+                                                         //keyup detects every key on the keyboard even if you are not typing values into the field
+                    currString = $('#text-field').val();
+   
+                    charCount = updateCount(currString);  //arbitrary because the variable is global
+
+                    if (strippedCharCount != 0){
+                    $("#counter").text(charCount); //was .html
+                    }
+                    else{
+                    $("#counter").text(maxChar);
+                    }
+                    
+                    if (charCount >= 0){ //if text is not zero and under or equal to the max, enable button and set count to normal colors
+                        $("#counter").removeClass( "text-red" ).addClass( "text-light-grey" );
+                        $("#post-button").removeClass("disabled-button").addClass( "enabled-button")
+                        $("#post-button").removeAttr('disabled');
+                    }
+                    if (charCount < 0){  //if text is too long, disable the button and make count red 
+                        $("#counter").removeClass( "text-light-grey" ).addClass( "text-red" );
+                        $("#post-button").removeClass("enabled-button").addClass( "disabled-button")
+                        $("#post-button").attr('disabled','disabled');
+                    }
+                    if (strippedCharCount ==0){  //if text is all spaces or empty, disable button
+                        $("#post-button").removeClass("enabled-button").addClass( "disabled-button")
+                        $("#post-button").attr('disabled','disabled');
+                    }
+                })
+            })
+
+            $(document).ready(function(){ //calls for new posts to be uploaded
+                $("#post-button").click(function(){
+                    uploadPost();
+                })
+                $("#text-field").keyup(function(event) { //if enter key is pressed instead, act as if a button was pressed
+                    // console.log(event.key);
+                    // console.log(event.keyCode);
+                    // console.log(event.which);
+                    if (event.key === "Enter") { //code 13 stands for the enter with e.keyCode and e.which, but both of these are depreciated so instead I chose to use e.key 
+                        $("#post-button").click();
+                    }
+                })
+            })
+
+
+        </script>
+
+        <style>
+            body{
+                overflow: hidden;
+                margin-top:0;
+            }
+            .wrapper{
+                margin-left: auto;
+                margin-right: auto;
+                width: 50vw;
+                height: 100vh;
+                background-color: rgb(21,32,43);
+                text-align: center;
+                color:white;
+                padding-top: 5vh;
+                font-size: 1.2rem;
+            }
+            .text-box-wrapper{
+                position: relative;
+                top: 0;
+                width: 100%;
+            }
+            .text-wrapper{
+                width: 90%;
+                min-height: 40%;
+                text-align: left;
+                margin-left: auto;
+                margin-right: auto;
+                font-size: 1.5rem;
+                color:white;
+                background-color: rgb(21,32,43);
+                resize: none; /*disable resizing option 
+                                I used text area incase we someday want to increase the character count*/
+            }
+            .counter-wrapper{
+                position: relative;
+                width: 95.5%;
+                text-align: right;
+                
+            }
+            .post-wrapper{
+                    width:90%;
+                    text-align: left;
+                    margin-left: auto;
+                    margin-right: auto;
+            }
+            .name-partition{ 
+                width: 15%;
+                text-align: center;
+                display: inline-block;
+
+            }
+            .message-partition{ 
+                width: 85%;
+                text-align:top;
+                display: inline-block;
+
+            }
+            .text-light-grey{
+                color: lightgray;
+                font-weight:normal;
+            }
+            .text-red{
+                color: red;
+                font-weight: bold;
+            }
+            .text-post{
+                width:99%;
+                text-align: left;
+                border: solid white .01rem;
+                word-wrap: break-word;
+                word-break: break-word;
+                white-space: normal;
+                vertical-align: top;
+            }
+            .disabled-button {
+                border: solid lightgray .01rem;
+                color: lightgray;
+                background: rgb(246, 246, 246);
+            }
+            .enabled-button{
+                border: solid darkgray .01rem;
+                color: black;
+                background: rgb(255,255,255);
+                background: linear-gradient(0deg, rgba(255,255,255,1) 0%, rgba(215,215,215,1) 70%, rgba(203,203,203,1) 100%);
+            }
+            .button-style{
+                font-size: 1rem;
+                padding-top: .5vh;
+                padding-bottom: .5vh;
+                text-align: center;
+            }
+            #counter{
+                display: inline-block;
+            }
+            #posts-container{
+                width: 100%;
+                height:76vh;
+                border-top: solid white .01rem;
+                padding-top: 2vh;
+                overflow: scroll;
+            }
+        </style>
+
+    </head>
+
+    <body>
+
+        <div class= "wrapper">
+            <div class = "post-wrapper">Write a Tweet:
+            </div>
+            <div class= "text-box-wrapper">
+                <input type="text" id="text-field" class="text-wrapper"></input>
+            </div>
+            
+            <div class= "counter-wrapper">  <!-- characters_remaining -->
+                <div type="text" id="counter" ></div>
+                <button id="post-button" class= "button-style" >Post Tweet</button>
+            </div>
+
+            <div class = "post-wrapper">Your Posts:
+                <div id="posts-container" >
+
+                </div>
+            </div>
+        </div>
+
+
+    </body>
+</html>
